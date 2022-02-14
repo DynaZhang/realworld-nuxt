@@ -44,11 +44,47 @@ export default {
 
     router: {
         extendRoutes(routes, resolve) {
-            routes.push({
-                name: 'register',
-                path: '/register',
-                component: path.resolve(__dirname, './pages/login')
-            })
+            // 清除 Nuxt.js 基于 pages 目录生成的默认的路由表规则
+            routes.splice(0)
+
+            const defaultRoutes = [{
+                // 默认子路由
+                path: '',
+                name: 'home',
+                component: resolve(__dirname, 'pages/index.vue'),
+            },
+                {
+                    path: '/login',
+                    name: 'login',
+                    component: resolve(__dirname, 'pages/login.vue'),
+                },
+                {
+                    path: '/register',
+                    name: 'register',
+                    component: resolve(__dirname, 'pages/login.vue'),
+                },
+                {
+                    path: '/profile/:username',
+                    name: 'profile',
+                    component: resolve(__dirname, 'pages/profile.vue'),
+                },
+                {
+                    path: '/settings',
+                    name: 'settings',
+                    component: resolve(__dirname, 'pages/settings.vue'),
+                },
+                {
+                    path: '/editor',
+                    name: 'editor',
+                    component: resolve(__dirname, 'pages/editor.vue'),
+                },
+                {
+                    path: '/article/:slug',
+                    name: 'article',
+                    component: resolve(__dirname, 'pages/article.vue'),
+                }]
+
+            routes.push(...defaultRoutes)
         }
     }
 }
