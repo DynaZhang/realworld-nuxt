@@ -15,10 +15,20 @@
                     <div class="feed-toggle">
                         <ul class="nav nav-pills outline-active">
                             <li class="nav-item">
-                                <a class="nav-link disabled" href="">Your Feed</a>
+                                <nuxt-link
+                                    class="nav-link"
+                                    :class="{disabled: !userInfo, active: tab === 'feed'}"
+                                    :to="{ name: 'home', query: { page: 1, tag: tag, tab: 'feed'}}">
+                                    Your Feed
+                                </nuxt-link>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link active" href="">Global Feed</a>
+                                <nuxt-link
+                                    class="nav-link"
+                                    :class="{active: tab !== 'feed'}"
+                                    :to="{ name: 'home', query: { page: 1, tag: tag, tab: ''}}">
+                                    Global Feed
+                                </nuxt-link>
                             </li>
                         </ul>
                     </div>
@@ -29,7 +39,11 @@
                                 <img :src="article.author.image"/>
                             </nuxt-link>
                             <div class="info">
-                                <nuxt-link :to="'/profile/' + article.author.username" class="author">{{article.author.username}}</nuxt-link>
+                                <nuxt-link
+                                    :to="'/profile/' + article.author.username"
+                                    class="author">
+                                    {{article.author.username}}
+                                </nuxt-link>
                                 <span class="date">{{article.createdAt}}</span>
                             </div>
                             <button class="btn btn-outline-primary btn-sm pull-xs-right">
@@ -42,6 +56,18 @@
                             <span>Read more...</span>
                         </nuxt-link>
                     </div>
+
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item" :class="{ active: item === page }" v-for="item in totalPage" :key="item">
+                                <nuxt-link
+                                    class="page-link"
+                                    :to="{ name: 'home', query: { page: item, tag: tag, tab: tab}}">
+                                    {{ item }}
+                                </nuxt-link>
+                            </li>
+                        </ul>
+                    </nav>
 
                 </div>
 
@@ -69,17 +95,54 @@
 </template>
 
 <script>
-import { getArticals } from '../api/article'
+import { mapGetters } from 'vuex';
+import { getArticles, getFeedArticles } from '../api/article';
+
 export default {
     name: 'IndexPage',
-    async asyncData() {
-        const { articles, articlesCount } = await getArticals({
-            limit: 10,
-            offset: 0
-        });
-        return {
-            articles,
-            articlesCount
+    computed: {
+      ...mapGetters({
+          userInfo: 'user/getUserInfo'
+      })
+    },
+    watchQuery: true,
+    async asyncData({route}) {
+        const page = parseInt(route.query.page) || 1;
+        const {tag, tab} = route.query
+        const limit = 2;
+        let data;
+        const params = {
+            limit,
+            offset: (page - 1) * limit
+        }
+        if (tag) {
+            params.tag = route.query.tag
+        }
+        try {
+            if (tab === 'feed') {
+                data = await getFeedArticles(params);
+            } else {
+                data = await getArticles(params);
+            }
+            const articles = data.articles;
+            const articlesCount = data.articlesCount;
+            return {
+                articles,
+                articlesCount,
+                page,
+                totalPage: Math.round(articlesCount / limit),
+                tag,
+                tab
+            }
+        } catch (e) {
+            return {
+                articles: [],
+                articlesCount: 0,
+                page: 1,
+                totalPage: 0,
+                tag: '',
+                tab: ''
+            }
         }
     }
 }
