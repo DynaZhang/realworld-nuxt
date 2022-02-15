@@ -1,5 +1,3 @@
-const path = require('path');
-
 export default {
     // Global page headers: https://go.nuxtjs.dev/config-head
     head: {
@@ -25,7 +23,10 @@ export default {
     css: [],
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-    plugins: [],
+    plugins: [
+        '~/plugins/request.js',
+        '~/plugins/filters.js'
+    ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
     components: true,
@@ -90,6 +91,6 @@ export default {
 
     server: {
         host: '0.0.0.0',
-        server: 3000
+        port: 3000
     }
 }
