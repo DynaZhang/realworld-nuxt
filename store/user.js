@@ -1,7 +1,9 @@
 export default {
     namespaced: true,
-    state: {
-        userInfo: null
+    state() {
+        return {
+            userInfo: null
+        }
     },
     getters: {
         getUserInfo: state => state.userInfo

@@ -4,111 +4,52 @@
         <div class="banner">
             <div class="container">
 
-                <h1>How to build webapps that scale</h1>
+                <h1>{{article.title}}</h1>
 
-                <div class="article-meta">
-                    <a href=""><img src="http://i.imgur.com/Qr71crq.jpg"/></a>
-                    <div class="info">
-                        <a href="" class="author">Eric Simons</a>
-                        <span class="date">January 20th</span>
-                    </div>
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="ion-plus-round"></i>
-                        &nbsp;
-                        Follow Eric Simons <span class="counter">(10)</span>
-                    </button>
-                    &nbsp;&nbsp;
-                    <button class="btn btn-sm btn-outline-primary">
-                        <i class="ion-heart"></i>
-                        &nbsp;
-                        Favorite Post <span class="counter">(29)</span>
-                    </button>
-                </div>
+                <article-meta :article="article" />
 
             </div>
         </div>
 
         <div class="container page">
 
-            <div class="row article-content">
-                <div class="col-md-12">
-                    <p>
-                        Web development technologies have evolved at an incredible clip over the past few years.
-                    </p>
-                    <h2 id="introducing-ionic">Introducing RealWorld.</h2>
-                    <p>It's a great solution for learning how other frameworks work.</p>
-                </div>
-            </div>
+            <div class="row article-content" v-html="article.body"></div>
 
             <hr/>
 
             <div class="article-actions">
-                <div class="article-meta">
-                    <a href="profile.html"><img src="http://i.imgur.com/Qr71crq.jpg"/></a>
-                    <div class="info">
-                        <a href="" class="author">Eric Simons</a>
-                        <span class="date">January 20th</span>
-                    </div>
-
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="ion-plus-round"></i>
-                        &nbsp;
-                        Follow Eric Simons
-                    </button>
-                    &nbsp;
-                    <button class="btn btn-sm btn-outline-primary">
-                        <i class="ion-heart"></i>
-                        &nbsp;
-                        Favorite Post <span class="counter">(29)</span>
-                    </button>
-                </div>
+                <article-meta :article="article" />
             </div>
 
             <div class="row">
 
                 <div class="col-xs-12 col-md-8 offset-md-2">
 
-                    <form class="card comment-form">
+                    <form class="card comment-form" v-if="userInfo">
                         <div class="card-block">
-                            <textarea class="form-control" placeholder="Write a comment..." rows="3"></textarea>
+                            <textarea v-model="commentBody" class="form-control" placeholder="Write a comment..." rows="3"></textarea>
                         </div>
                         <div class="card-footer">
-                            <img src="http://i.imgur.com/Qr71crq.jpg" class="comment-author-img"/>
-                            <button class="btn btn-sm btn-primary">
-                                Post Comment
-                            </button>
+                            <img :src="userInfo.bio" class="comment-author-img"/>
+                            <button class="btn btn-sm btn-primary" @click="handleAddComment">Post Comment</button>
                         </div>
                     </form>
 
-                    <div class="card">
+                    <div class="card" v-if="(comment, index) in comments" :key="comment.id">
                         <div class="card-block">
-                            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                            <p class="card-text">{{comment.body}}</p>
                         </div>
                         <div class="card-footer">
-                            <a href="" class="comment-author">
-                                <img src="http://i.imgur.com/Qr71crq.jpg" class="comment-author-img"/>
-                            </a>
+                            <nuxt-link :to="`/profile/${comment.author.username}`" class="comment-author">
+                                <img :src="comment.author.bio" class="comment-author-img"/>
+                            </nuxt-link>
                             &nbsp;
-                            <a href="" class="comment-author">Jacob Schmidt</a>
-                            <span class="date-posted">Dec 29th</span>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-block">
-                            <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                        </div>
-                        <div class="card-footer">
-                            <a href="" class="comment-author">
-                                <img src="http://i.imgur.com/Qr71crq.jpg" class="comment-author-img"/>
-                            </a>
-                            &nbsp;
-                            <a href="" class="comment-author">Jacob Schmidt</a>
-                            <span class="date-posted">Dec 29th</span>
-                            <span class="mod-options">
-              <i class="ion-edit"></i>
-              <i class="ion-trash-a"></i>
-            </span>
+                            <a href="" class="comment-author">{{comment.author.username}}</a>
+                            <span class="date-posted">{{comment.createdAt | formatDate}}</span>
+                            <span class="mod-options" v-if="comment.author.username === userInfo.username">
+                                <i class="ion-edit"></i>
+                                <i class="ion-trash-a" @click="handleDelComment(comment, index)"></i>
+                            </span>
                         </div>
                     </div>
 
@@ -122,8 +63,77 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex';
+import ArticleMeta from '../components/ArticleMeta';
+import MarkdownIt from 'markdown-it';
+import { getArticle } from '../api/article';
+import { addComment, delComment, getComments } from '../api/comments';
+
 export default {
-    name: 'ArticlesPage'
+    name: 'ArticlesPage',
+    components: { ArticleMeta },
+    async asyncData({route, store}) {
+        let data;
+        let article = {};
+        let comments = [];
+        const {slug} = route.params;
+        const md = new MarkdownIt();
+        try {
+            data = await getArticle(slug);
+            article = data.article;
+            article.favoritedEnabled = store.state.user.userInfo;
+            article.followEnabled = store.state.user.userInfo;
+            article.body = md.render(article.body);
+            data = await getComments(slug);
+            comments = data.comments;
+        } catch (e) {
+            article = {};
+            comments = [];
+        }
+        return {
+            article,
+            comments
+        }
+    },
+    head() {
+        return {
+            title: `${this.article.title} - RealWorld`,
+            meta: [
+                { hid: 'description', name: 'description', content: this.article.description}
+            ]
+        }
+    },
+    data() {
+        return {
+            commentBody: ''
+        }
+    },
+    computed: {
+        ...mapGetters({
+            userInfo: 'user/getUserInfo'
+        })
+    },
+    methods: {
+        async handleAddComment() {
+            const params = {
+                body: this.commentBody
+            };
+            try {
+                const data = await addComment(params, this.article.slug);
+                this.comments.push(data.comment);
+            } catch (e) {
+                alert('评论失败');
+            }
+        },
+        async handleDelComment(comment, index) {
+            try {
+                await delComment(this.article.slug, comment.id);
+                this.comments.splice(index, 1);
+            } catch (e) {
+                alert('删除评论失败');
+            }
+        }
+    }
 }
 </script>
 

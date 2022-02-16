@@ -36,3 +36,10 @@ export const setArticleUnFavorite = (slug) => {
         url: `/articles/${slug}/favorite`
     })
 }
+
+export const getArticle = (slug) => {
+    return request.request({
+        method: 'get',
+        url: `/articles/${slug}`
+    })
+}
