@@ -178,9 +178,6 @@ export default {
             article.favorited = !article.favorited;
 
         }
-    },
-    mounted() {
-        getArticleTags()
     }
 }
 </script>
