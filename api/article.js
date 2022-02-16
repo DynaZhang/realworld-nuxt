@@ -43,3 +43,11 @@ export const getArticle = (slug) => {
         url: `/articles/${slug}`
     })
 }
+
+export const addArticle = (data) => {
+    return request.request({
+        method: 'post',
+        url: '/articles',
+        data
+    })
+}

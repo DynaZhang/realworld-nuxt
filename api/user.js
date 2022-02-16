@@ -11,3 +11,11 @@ export const userRegister = (data) => {
 export const getCurrentUser = () => {
     return request.get('/user');
 }
+
+export const updateUser = (data) => {
+    return request.request({
+        method: 'put',
+        url: '/user',
+        data
+    })
+}

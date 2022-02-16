@@ -1,7 +1,7 @@
 <template>
     <div class="article-meta">
         <nuxt-link :to="`/profile/${article.author.username}`">
-            <img :src="article.author.bio"/>
+            <img :src="article.author.image"/>
         </nuxt-link>
         <div class="info">
             <nuxt-link :to="`/profile/${article.author.username}`" class="author">

@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+
 export default {
     namespaced: true,
     state() {
@@ -11,6 +13,7 @@ export default {
     mutations: {
         setUserInfo: (state, userInfo) => {
             state.userInfo = userInfo;
+            Cookies.set('user', JSON.stringify(userInfo));
         }
     },
     actions: {
