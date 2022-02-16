@@ -30,7 +30,7 @@
                             <textarea v-model="commentBody" class="form-control" placeholder="Write a comment..." rows="3"></textarea>
                         </div>
                         <div class="card-footer">
-                            <img :src="userInfo.bio" class="comment-author-img"/>
+                            <img :src="userInfo.image" class="comment-author-img"/>
                             <button class="btn btn-sm btn-primary" @click="handleAddComment">Post Comment</button>
                         </div>
                     </form>
@@ -41,7 +41,7 @@
                         </div>
                         <div class="card-footer">
                             <nuxt-link :to="`/profile/${comment.author.username}`" class="comment-author">
-                                <img :src="comment.author.bio" class="comment-author-img"/>
+                                <img :src="comment.author.image" class="comment-author-img"/>
                             </nuxt-link>
                             &nbsp;
                             <a href="" class="comment-author">{{comment.author.username}}</a>

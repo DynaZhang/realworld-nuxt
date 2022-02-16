@@ -35,12 +35,10 @@
 </template>
 
 <script>
-import Cookies from "js-cookie";
 import { userLogin, userRegister } from "../api/user";
 
 export default {
     name: 'LoginRegisterPage',
-    middleware: 'authenticated',
     data () {
         return {
             errorMessages: {},
@@ -67,7 +65,6 @@ export default {
                     delete params.user.username;
                     const userInfo = await userLogin(params);
                     await this.$store.dispatch('user/setUserInfoAction', userInfo.user);
-                    Cookies.set('user', JSON.stringify(userInfo.user));
                     await this.$router.replace('/');
                 } else {
                     await userRegister(params);

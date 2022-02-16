@@ -13,3 +13,10 @@ export const unFollowUser = (username) => {
         url: `/profiles/${username}/follow`
     })
 }
+
+export const getProfileDetail = (username) => {
+    return request.request({
+        method: 'get',
+        url: `/profiles/${username}`
+    })
+}
